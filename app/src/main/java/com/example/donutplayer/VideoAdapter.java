@@ -10,7 +10,10 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.donutplayer.databinding.VideoViewBinding;
+import com.google.android.material.imageview.ShapeableImageView;
 
 import java.util.ArrayList;
 
@@ -29,12 +32,15 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoHolder>
         public TextView folder;
         public TextView duration;
 
+        public ShapeableImageView image;
+
         public VideoHolder(VideoViewBinding binding) {
             super(binding.getRoot());
 //            title = (TextView) itemView.findViewById(R.id.videoName);
             title = binding.videoName;
             folder = binding.folderName;
             duration = binding.duration;
+            image = binding.videoImage;
         }
     }
 
@@ -52,6 +58,11 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoHolder>
         holder.title.setText(videoList.get(position).getTitle());
         holder.folder.setText(videoList.get(position).getFolderName());
         holder.duration.setText(DateUtils.formatElapsedTime(videoList.get(position).getDuration() / 1000));
+        Glide.with(context)
+                .asBitmap()
+                .load(videoList.get(position).getArtUri())
+                .apply(new RequestOptions().placeholder(R.mipmap.ic_video_player).centerCrop())
+                .into(holder.image);
     }
 
     @Override
