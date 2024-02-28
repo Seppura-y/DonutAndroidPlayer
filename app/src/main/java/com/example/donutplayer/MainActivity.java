@@ -10,7 +10,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.MenuItem;
@@ -20,6 +23,9 @@ import android.widget.Toast;
 import com.example.donutplayer.databinding.ActivityMainBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
+
+import java.io.File;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -31,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private ActionBarDrawerToggle toggle = null;
 
+    public static ArrayList<VideoData> videoList= new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,8 +48,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         // 一般来说，申请权限函数应该在setContentView之后调用，这样可以避免在用户还没有看到界面的时候就弹出权限请求对话框
-        requestRuntimePermission();
-
+        if(requestRuntimePermission() == true)
+        {
+            videoList = getAllVideos();
+            setFragment(new VideosFragment());
+        }
 
         toggle = new ActionBarDrawerToggle(this, binding.getRoot(), R.string.open, R.string.close);
         binding.getRoot().addDrawerListener(toggle);
@@ -52,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        setFragment(new VideosFragment());
+
 
         binding.bottomNav.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
               @Override
@@ -151,6 +162,51 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+    @SuppressLint({"Range"})
+    private ArrayList<VideoData> getAllVideos(){
+        ArrayList<VideoData> tempList = new ArrayList<>();
+
+        String[] projection = {
+                MediaStore.Video.Media.TITLE,
+                MediaStore.Video.Media.SIZE,
+                MediaStore.Video.Media._ID,
+                MediaStore.Video.Media.BUCKET_DISPLAY_NAME,
+                MediaStore.Video.Media.DATA,
+                MediaStore.Video.Media.DATE_ADDED,
+                MediaStore.Video.Media.DURATION
+        };
+
+        Cursor cursor = this.getContentResolver().query(
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                projection,
+                null,
+                null,
+                MediaStore.Video.Media.DATE_ADDED + " DESC"
+        );
+
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                String titleC = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.TITLE));
+                String idC = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media._ID));
+                String folderC = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.BUCKET_DISPLAY_NAME));
+                String sizeC = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.SIZE));
+                String pathC = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA));
+                long durationC = cursor.getLong(cursor.getColumnIndex(MediaStore.Video.Media.DURATION));
+
+                try {
+                    File file = new File(pathC);
+                    Uri artUriC = Uri.fromFile(file);
+                    VideoData video = new VideoData(titleC, idC, durationC, folderC, sizeC, pathC, artUriC);
+                    if (file.exists()) tempList.add(video);
+                } catch (Exception e) {
+                    // Handle exception
+                }
+            }
+            cursor.close();
+        }
+        return tempList;
+
     }
 
     public native String stringFromJNI();

@@ -1,6 +1,8 @@
 package com.example.donutplayer;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,36 +10,48 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.donutplayer.databinding.VideoViewBinding;
+
 import java.util.ArrayList;
 
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoHolder> {
     private Context context;
-    private ArrayList<String> videoList;
+    private ArrayList<VideoData> videoList;
 
-    public VideoAdapter(Context context, ArrayList<String> videoList) {
+    public VideoAdapter(Context context, ArrayList<VideoData> videoList) {
         this.context = context;
         this.videoList = videoList;
     }
 
+
     public static class VideoHolder extends RecyclerView.ViewHolder {
         public TextView title;
+        public TextView folder;
+        public TextView duration;
 
-        public VideoHolder(View itemView) {
-            super(itemView);
-            title = (TextView) itemView.findViewById(R.id.videoName);
+        public VideoHolder(VideoViewBinding binding) {
+            super(binding.getRoot());
+//            title = (TextView) itemView.findViewById(R.id.videoName);
+            title = binding.videoName;
+            folder = binding.folderName;
+            duration = binding.duration;
         }
     }
 
     @Override
     public VideoHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-        View view = layoutInflater.inflate(R.layout.video_view, parent, false);
-        return new VideoHolder(view);
+//        View view = layoutInflater.inflate(R.layout.video_view, parent, false);
+
+        VideoViewBinding binding = VideoViewBinding.inflate(layoutInflater,parent,false);
+        return new VideoHolder(binding);
     }
 
     @Override
     public void onBindViewHolder(VideoHolder holder, int position) {
-        holder.title.setText(videoList.get(position));
+        holder.title.setText(videoList.get(position).getTitle());
+        holder.folder.setText(videoList.get(position).getFolderName());
+        holder.duration.setText(DateUtils.formatElapsedTime(videoList.get(position).getDuration() / 1000));
     }
 
     @Override

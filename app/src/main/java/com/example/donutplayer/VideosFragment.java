@@ -20,16 +20,11 @@ public class VideosFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_videos, container, false);
         FragmentVideosBinding binding = FragmentVideosBinding.bind(view);
-        ArrayList<String> tempList = new ArrayList<String>();
-        tempList.add("First Video");
-        tempList.add("Second Video");
-        tempList.add("Third Video");
-        tempList.add("Fourth Video");
-        tempList.add("Fifth Video");
+
         binding.videoRecyclerView.setHasFixedSize(true);
         binding.videoRecyclerView.setItemViewCacheSize(10);
         binding.videoRecyclerView.setLayoutManager(new LinearLayoutManager(this.requireContext()));
-        binding.videoRecyclerView.setAdapter(new VideoAdapter(this.requireContext(), tempList));
+        binding.videoRecyclerView.setAdapter(new VideoAdapter(this.requireContext(), MainActivity.videoList));
         return view;
     }
 }
