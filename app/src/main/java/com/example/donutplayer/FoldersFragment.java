@@ -24,6 +24,7 @@ public class FoldersFragment extends Fragment {
         binding.folderRecyclerView.setItemViewCacheSize(10);
         binding.folderRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.folderRecyclerView.setAdapter(new FolderAdapter(requireContext(), MainActivity.folderList));
+        binding.totalFolders.setText("Total Folders: " + MainActivity.folderList.size());
         return binding.getRoot();
     }
 
