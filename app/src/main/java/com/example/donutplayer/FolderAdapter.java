@@ -1,12 +1,15 @@
 package com.example.donutplayer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.donutplayer.databinding.FolderViewBinding;
@@ -25,9 +28,11 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.FolderHold
     class FolderHolder extends RecyclerView.ViewHolder{
 
         private TextView folderName;
+        private LinearLayout root;
         public FolderHolder(FolderViewBinding binding) {
             super(binding.getRoot());
-            folderName = binding.folderNameTextView;
+            this.folderName = binding.folderNameTextView;
+            this.root = binding.getRoot();
         }
     }
 
@@ -42,6 +47,14 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.FolderHold
     @Override
     public void onBindViewHolder(@NonNull FolderHolder holder, int position) {
         holder.folderName.setText(folderList.get(position).getFolderName());
+        holder.root.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, FolderActivity.class);
+                intent.putExtra("position", position);
+                ContextCompat.startActivity(context, intent, null);
+            }
+        });
     }
 
     @Override
