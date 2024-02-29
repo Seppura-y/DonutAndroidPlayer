@@ -78,3 +78,30 @@ public class VideoData {
         this.artUri = artUri;
     }
 }
+
+
+class FolderData{
+    private String id;
+    private String folderName;
+
+    public FolderData(String id, String folderName){
+        this.id = id;
+        this.folderName = folderName;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setFolderName(String folderName) {
+        this.folderName = folderName;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getFolderName() {
+        return folderName;
+    }
+}

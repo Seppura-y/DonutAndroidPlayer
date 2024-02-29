@@ -15,9 +15,9 @@ import java.util.ArrayList;
 
 public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.FolderHolder> {
     private Context context;
-    private ArrayList<String> folderList;
+    private ArrayList<FolderData> folderList;
 
-    public FolderAdapter(Context context, ArrayList<String> folderList) {
+    public FolderAdapter(Context context, ArrayList<FolderData> folderList) {
         this.context = context;
         this.folderList = folderList;
     }
@@ -41,7 +41,7 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.FolderHold
 
     @Override
     public void onBindViewHolder(@NonNull FolderHolder holder, int position) {
-        holder.folderName.setText(folderList.get(position));
+        holder.folderName.setText(folderList.get(position).getFolderName());
     }
 
     @Override

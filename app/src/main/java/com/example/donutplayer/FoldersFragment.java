@@ -19,18 +19,11 @@ public class FoldersFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         FragmentFoldersBinding binding = FragmentFoldersBinding.inflate(inflater, container, false);
-        ArrayList<String> tempList = new ArrayList<>();
-        tempList.add("a folder");
-        tempList.add("b folder");
-        tempList.add("c folder");
-        tempList.add("d folder");
-        tempList.add("e folder");
-
 
         binding.folderRecyclerView.setHasFixedSize(true);
         binding.folderRecyclerView.setItemViewCacheSize(10);
         binding.folderRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        binding.folderRecyclerView.setAdapter(new FolderAdapter(requireContext(), tempList));
+        binding.folderRecyclerView.setAdapter(new FolderAdapter(requireContext(), MainActivity.folderList));
         return binding.getRoot();
     }
 
