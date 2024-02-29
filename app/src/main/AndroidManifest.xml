@@ -17,6 +17,9 @@
         android:theme="@style/Theme.DonutPlayer"
         tools:ignore="AllowBackup">
         <activity
+            android:name=".PlayerActivity"
+            android:exported="false" />
+        <activity
             android:name=".FolderActivity"
             android:exported="false" />
         <activity

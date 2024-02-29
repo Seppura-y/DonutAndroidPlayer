@@ -2,12 +2,15 @@ package com.example.donutplayer;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -34,6 +37,8 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoHolder>
 
         public ShapeableImageView image;
 
+        public LinearLayout root;
+
         public VideoHolder(VideoViewBinding binding) {
             super(binding.getRoot());
 //            title = (TextView) itemView.findViewById(R.id.videoName);
@@ -41,6 +46,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoHolder>
             folder = binding.folderName;
             duration = binding.duration;
             image = binding.videoImage;
+            root = binding.getRoot();
         }
     }
 
@@ -63,6 +69,14 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoHolder>
                 .load(videoList.get(position).getArtUri())
                 .apply(new RequestOptions().placeholder(R.mipmap.ic_video_player).centerCrop())
                 .into(holder.image);
+
+        holder.root.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, PlayerActivity.class);
+                ContextCompat.startActivity(context, intent, null);
+            }
+        });
     }
 
     @Override
