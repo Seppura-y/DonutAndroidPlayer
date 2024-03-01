@@ -50,6 +50,8 @@ public class PlayerActivity extends AppCompatActivity {
     private void createPlayer(){
         player = new SimpleExoPlayer.Builder(this).build();
         binding.playerView.setPlayer(player);
+        binding.videoTitle.setText(playerList.get(position).getTitle());
+        binding.videoTitle.setSelected(true);
 
         MediaItem mediaItem = MediaItem.fromUri(playerList.get(position).getArtUri());
         player.setMediaItem(mediaItem);
