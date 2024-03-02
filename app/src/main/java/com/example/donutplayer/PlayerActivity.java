@@ -66,9 +66,24 @@ public class PlayerActivity extends AppCompatActivity {
                 }
             }
         });
+
+        binding.nextBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                nextPreviousVideo(true);
+            }
+        });
+
+        binding.previousBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                nextPreviousVideo(false);
+            }
+        });
     }
 
     private void createPlayer(){
+        try{player.release();} catch(Exception e){}
         player = new SimpleExoPlayer.Builder(this).build();
         binding.playerView.setPlayer(player);
         binding.videoTitle.setText(playerList.get(position).getTitle());
@@ -92,6 +107,36 @@ public class PlayerActivity extends AppCompatActivity {
         player.pause();
     }
 
+    private void nextPreviousVideo(Boolean isNext)
+    {
+        if(isNext){
+            setPosition(true);
+        }
+        else{
+            setPosition(false);
+        }
+
+        createPlayer();
+    }
+
+    private void setPosition(Boolean isIncrement){
+        if(isIncrement){
+            if(playerList.size() - 1 == position){
+                position = 0;
+            }
+            else {
+                position++;
+            }
+        }
+        else{
+            if(position == 0){
+                position = playerList.size() - 1;
+            }
+            else{
+                position--;
+            }
+        }
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();
