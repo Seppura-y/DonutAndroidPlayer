@@ -1,9 +1,13 @@
 package com.example.donutplayer;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.WindowCompat;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 
 import com.example.donutplayer.databinding.ActivityPlayerBinding;
 import com.google.android.exoplayer2.MediaItem;
@@ -11,6 +15,12 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 
 import java.util.ArrayList;
 import java.util.Objects;
+
+import android.view.Window;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
+
 
 public class PlayerActivity extends AppCompatActivity {
 
@@ -22,9 +32,37 @@ public class PlayerActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // 应用自定义主题
+        // 需要在setContentView前调用
+        setTheme(R.style.playerActivityTheme);
+
+        // 隐藏标题栏
+        // 需要在setContentView前调用
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P){
+            WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
+            // 内容延伸至刘海区域
+            layoutParams.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+            getWindow().setAttributes(layoutParams);
+        }
 
         binding = ActivityPlayerBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // 沉浸式 immersive mode
+        // 需要在setContentView后调用
+        // 需要引入implementation 'androidx.core:core-ktx:1.6.0'
+
+        // 获取当前窗口对象
+        Window window = getWindow();
+        // 设置窗口不适配系统窗口
+        WindowCompat.setDecorFitsSystemWindows(window, false);
+        WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(window, binding.getRoot());
+        // 隐藏系统栏
+        controller.hide(WindowInsetsCompat.Type.systemBars());
+        // 设置系统栏的行为为通过滑动屏幕边缘来临时显示
+        controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
 
         initializeLayout();
         initializeBinding();
