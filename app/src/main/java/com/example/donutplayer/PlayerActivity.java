@@ -3,6 +3,7 @@ package com.example.donutplayer;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.view.View;
 
 import com.example.donutplayer.databinding.ActivityPlayerBinding;
 import com.google.android.exoplayer2.MediaItem;
@@ -26,7 +27,7 @@ public class PlayerActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         initializeLayout();
-
+        initializeBinding();
     }
 
     private void initializeLayout(){
@@ -34,17 +35,37 @@ public class PlayerActivity extends AppCompatActivity {
             case "AllVideos":{
                 playerList = new ArrayList<>();
                 playerList.addAll(MainActivity.videoList);
+                createPlayer();
                 break;
             }
             case "FolderActivity":{
                 playerList = new ArrayList<>();
                 playerList.addAll(FolderActivity.currentFolderVideos);
+                createPlayer();
                 break;
             }
             default:
         }
+    }
 
-        createPlayer();
+    private void initializeBinding(){
+        binding.backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+        binding.playPauseBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(player.isPlaying()){
+                    pauseVideo();
+                } else{
+                  playVideo();
+                }
+            }
+        });
     }
 
     private void createPlayer(){
@@ -56,7 +77,19 @@ public class PlayerActivity extends AppCompatActivity {
         MediaItem mediaItem = MediaItem.fromUri(playerList.get(position).getArtUri());
         player.setMediaItem(mediaItem);
         player.prepare();
+//        player.play();
+
+        playVideo();
+    }
+
+    private void playVideo(){
+        binding.playPauseBtn.setImageResource(R.drawable.pause_icon);
         player.play();
+    }
+
+    private void pauseVideo(){
+        binding.playPauseBtn.setImageResource(R.drawable.play_icon);
+        player.pause();
     }
 
     @Override

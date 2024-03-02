@@ -204,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     File file = new File(pathC);
                     Uri artUriC = Uri.fromFile(file);
-                    VideoData video = new VideoData(titleC, idC, durationC, folderC, sizeC, pathC, artUriC);
+                    VideoData video = new VideoData(idC, titleC, durationC, folderC, sizeC, pathC, artUriC);
                     if (file.exists()) tempList.add(video);
 
                     if(!tempFolderList.contains(folderC)){
