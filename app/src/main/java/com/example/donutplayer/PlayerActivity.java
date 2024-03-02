@@ -11,6 +11,7 @@ import android.view.WindowManager;
 
 import com.example.donutplayer.databinding.ActivityPlayerBinding;
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import androidx.core.view.WindowInsetsControllerCompat;
 public class PlayerActivity extends AppCompatActivity {
 
     public static int position = -1;
+    private Boolean repeat = false;
     private static ActivityPlayerBinding binding = null;
     private static SimpleExoPlayer player = null;
     private static ArrayList<VideoData> playerList;
@@ -118,6 +120,22 @@ public class PlayerActivity extends AppCompatActivity {
                 nextPreviousVideo(false);
             }
         });
+
+        binding.repeatBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(repeat){
+                    repeat = false;
+                    player.setRepeatMode(Player.REPEAT_MODE_OFF);
+                    binding.repeatBtn.setImageResource(R.drawable.exo_controls_repeat_off);
+                }
+                else{
+                    repeat = true;
+                    player.setRepeatMode(Player.REPEAT_MODE_ALL);
+                    binding.repeatBtn.setImageResource(R.drawable.exo_controls_repeat_all);
+                }
+            }
+        });
     }
 
     private void createPlayer(){
@@ -131,6 +149,16 @@ public class PlayerActivity extends AppCompatActivity {
         player.setMediaItem(mediaItem);
         player.prepare();
 //        player.play();
+
+        player.addListener(new Player.Listener() {
+            @Override
+            public void onPlaybackStateChanged(int playbackState) {
+                Player.Listener.super.onPlaybackStateChanged(playbackState);
+                if(playbackState == Player.STATE_ENDED && repeat){
+                    nextPreviousVideo(true);
+                }
+            }
+        });
 
         playVideo();
     }
