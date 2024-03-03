@@ -1,5 +1,6 @@
 package com.example.donutplayer;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.WindowCompat;
 
@@ -15,17 +16,22 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.example.donutplayer.databinding.ActivityPlayerBinding;
+import com.example.donutplayer.databinding.MoreFeaturesBinding;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Objects;
 
 import android.view.Window;
+import android.widget.Toast;
+
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -40,6 +46,8 @@ public class PlayerActivity extends AppCompatActivity {
     private static ActivityPlayerBinding binding = null;
     private static Runnable runnable;
     private static SimpleExoPlayer player = null;
+
+    private static DefaultTrackSelector trackSelector = null;
     private static ArrayList<VideoData> playerList;
 
     @Override
@@ -186,6 +194,7 @@ public class PlayerActivity extends AppCompatActivity {
             public void onClick(View v) {
                 pauseVideo();
                 View customDialog = LayoutInflater.from(binding.getRoot().getContext()).inflate(R.layout.more_features, binding.getRoot(), false);
+                MoreFeaturesBinding mf_binding = MoreFeaturesBinding.bind(customDialog);
                 MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(binding.getRoot().getContext())
                         .setView(customDialog)
                         .setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -196,8 +205,46 @@ public class PlayerActivity extends AppCompatActivity {
                         })
                         .setBackground(new ColorDrawable(0x803700b3));
 
-                builder.create();
-                builder.show();
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+
+                mf_binding.audioTrackBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        alertDialog.dismiss();
+                        playVideo();
+
+                        ArrayList<String> audioTrack = new ArrayList<>();
+                        for(int i = 0; i < player.getCurrentTrackGroups().length; i++ ){
+                            if(player.getCurrentTrackGroups().get(i).getFormat(0).selectionFlags == C.SELECTION_FLAG_DEFAULT){
+                                audioTrack.add(
+                                        new Locale(player.getCurrentTrackGroups().get(i).getFormat(0).language.toString()).getDisplayLanguage()
+                                );
+                            }
+                        }
+
+                        CharSequence[] tempTracks = audioTrack.toArray(new CharSequence[audioTrack.size()]);
+                        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(binding.getRoot().getContext(), R.style.alertDialog)
+                                .setTitle("Select an Audio Track")
+                                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                                    @Override
+                                    public void onCancel(DialogInterface dialog) {
+                                        playVideo();
+                                    }
+                                })
+                                .setItems(tempTracks, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int position) {
+                                        Toast.makeText(binding.getRoot().getContext(), audioTrack.get(position) + " Selected", Toast.LENGTH_SHORT).show();
+                                        trackSelector.setParameters(trackSelector.buildUponParameters().setPreferredAudioLanguage(audioTrack.get(position)));
+                                    }
+                                })
+                                .setBackground(new ColorDrawable(0x803700b3));
+
+                        builder.create();
+                        builder.show();
+                    }
+                });
             }
         });
     }
