@@ -10,9 +10,11 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.example.donutplayer.databinding.ActivityPlayerBinding;
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -27,6 +29,7 @@ public class PlayerActivity extends AppCompatActivity {
 
     public static int position = -1;
     private Boolean repeat = false;
+    private Boolean isFullscreen = false;
     private static ActivityPlayerBinding binding = null;
     private static SimpleExoPlayer player = null;
     private static ArrayList<VideoData> playerList;
@@ -86,6 +89,8 @@ public class PlayerActivity extends AppCompatActivity {
             }
             default:
         }
+        if(repeat) binding.repeatBtn.setImageResource(R.drawable.exo_controls_repeat_all);
+        else binding.repeatBtn.setImageResource(R.drawable.exo_controls_repeat_off);
     }
 
     private void initializeBinding(){
@@ -136,6 +141,20 @@ public class PlayerActivity extends AppCompatActivity {
                 }
             }
         });
+
+        binding.fullscreenBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isFullscreen){
+                    isFullscreen = false;
+                    playInFullscreen(false);
+                }
+                else{
+                    isFullscreen = true;
+                    playInFullscreen(true);
+                }
+            }
+        });
     }
 
     private void createPlayer(){
@@ -161,6 +180,7 @@ public class PlayerActivity extends AppCompatActivity {
         });
 
         playVideo();
+        playInFullscreen(isFullscreen);
     }
 
     private void playVideo(){
@@ -201,6 +221,19 @@ public class PlayerActivity extends AppCompatActivity {
             else{
                 position--;
             }
+        }
+    }
+
+    private void playInFullscreen(Boolean enable){
+        if(enable){
+            binding.playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FILL);
+            player.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
+            binding.fullscreenBtn.setImageResource(R.drawable.fullscreen_exit_icon);
+        }
+        else{
+            binding.playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
+            player.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT);
+            binding.fullscreenBtn.setImageResource(R.drawable.fullscreen_icon);
         }
     }
     @Override
