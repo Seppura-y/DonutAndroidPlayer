@@ -5,6 +5,8 @@ import androidx.core.view.WindowCompat;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
+import android.os.Handler;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -31,6 +33,7 @@ public class PlayerActivity extends AppCompatActivity {
     private Boolean repeat = false;
     private Boolean isFullscreen = false;
     private static ActivityPlayerBinding binding = null;
+    private static Runnable runnable;
     private static SimpleExoPlayer player = null;
     private static ArrayList<VideoData> playerList;
 
@@ -181,6 +184,7 @@ public class PlayerActivity extends AppCompatActivity {
 
         playVideo();
         playInFullscreen(isFullscreen);
+        setVisibility();
     }
 
     private void playVideo(){
@@ -236,6 +240,33 @@ public class PlayerActivity extends AppCompatActivity {
             binding.fullscreenBtn.setImageResource(R.drawable.fullscreen_icon);
         }
     }
+    private void setVisibility(){
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                if(binding.playerView.isControllerVisible()){
+                    changeVisibility(View.VISIBLE);
+                }
+                else{
+                    changeVisibility(View.INVISIBLE);
+                }
+
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.postDelayed(runnable, 300);
+            }
+        };
+
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.postDelayed(runnable, 0);
+    }
+
+    private void changeVisibility(int visibility){
+        binding.topContorller.setVisibility(visibility);
+        binding.bottomContorller.setVisibility(visibility);
+        binding.playPauseBtn.setVisibility(visibility);
+    }
+
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
