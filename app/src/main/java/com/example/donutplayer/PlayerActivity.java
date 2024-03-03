@@ -32,6 +32,7 @@ public class PlayerActivity extends AppCompatActivity {
     public static int position = -1;
     private Boolean repeat = false;
     private Boolean isFullscreen = false;
+    private Boolean isLocked = false;
     private static ActivityPlayerBinding binding = null;
     private static Runnable runnable;
     private static SimpleExoPlayer player = null;
@@ -158,6 +159,23 @@ public class PlayerActivity extends AppCompatActivity {
                 }
             }
         });
+
+        binding.lockBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!isLocked){
+                    isLocked = true;
+                    binding.playerView.hideController();
+                    binding.playerView.setUseController(false);
+                    binding.lockBtn.setImageResource(R.drawable.lock_icon);
+                }else {
+                    isLocked = false;
+                    binding.playerView.showController();
+                    binding.playerView.setUseController(true);
+                    binding.lockBtn.setImageResource(R.drawable.unlock_icon);
+                }
+            }
+        });
     }
 
     private void createPlayer(){
@@ -252,7 +270,7 @@ public class PlayerActivity extends AppCompatActivity {
                 }
 
                 Handler handler = new Handler(Looper.getMainLooper());
-                handler.postDelayed(runnable, 300);
+                handler.postDelayed(runnable, 30);
             }
         };
 
@@ -264,6 +282,8 @@ public class PlayerActivity extends AppCompatActivity {
         binding.topContorller.setVisibility(visibility);
         binding.bottomContorller.setVisibility(visibility);
         binding.playPauseBtn.setVisibility(visibility);
+        if(isLocked) binding.lockBtn.setVisibility(View.VISIBLE);
+        else binding.lockBtn.setVisibility(visibility);
     }
 
 
