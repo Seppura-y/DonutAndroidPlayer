@@ -3,10 +3,13 @@ package com.example.donutplayer;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.WindowCompat;
 
+import android.content.DialogInterface;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.Handler;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -17,6 +20,7 @@ import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -174,6 +178,26 @@ public class PlayerActivity extends AppCompatActivity {
                     binding.playerView.setUseController(true);
                     binding.lockBtn.setImageResource(R.drawable.unlock_icon);
                 }
+            }
+        });
+
+        binding.moreFeaturesBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pauseVideo();
+                View customDialog = LayoutInflater.from(binding.getRoot().getContext()).inflate(R.layout.more_features, binding.getRoot(), false);
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(binding.getRoot().getContext())
+                        .setView(customDialog)
+                        .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                            @Override
+                            public void onCancel(DialogInterface dialog) {
+                                playVideo();
+                            }
+                        })
+                        .setBackground(new ColorDrawable(0x803700b3));
+
+                builder.create();
+                builder.show();
             }
         });
     }
