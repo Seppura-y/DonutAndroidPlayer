@@ -43,6 +43,7 @@ public class PlayerActivity extends AppCompatActivity {
     private Boolean repeat = false;
     private Boolean isFullscreen = false;
     private Boolean isLocked = false;
+    private Boolean isSubtitle = true;
     private static ActivityPlayerBinding binding = null;
     private static Runnable runnable;
     private static SimpleExoPlayer player = null;
@@ -218,7 +219,13 @@ public class PlayerActivity extends AppCompatActivity {
                         for(int i = 0; i < player.getCurrentTrackGroups().length; i++ ){
                             if(player.getCurrentTrackGroups().get(i).getFormat(0).selectionFlags == C.SELECTION_FLAG_DEFAULT){
                                 audioTrack.add(
-                                        new Locale(player.getCurrentTrackGroups().get(i).getFormat(0).language.toString()).getDisplayLanguage()
+                                        new Locale(
+                                                player.getCurrentTrackGroups()
+                                                        .get(i)
+                                                        .getFormat(0)
+                                                        .language
+                                                        .toString()
+                                        ).getDisplayLanguage()
                                 );
                             }
                         }
@@ -245,13 +252,46 @@ public class PlayerActivity extends AppCompatActivity {
                         builder.show();
                     }
                 });
+
+
+                mf_binding.subtitleBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if(isSubtitle){
+                            DefaultTrackSelector.ParametersBuilder builder =
+                                    new DefaultTrackSelector.ParametersBuilder(binding.getRoot().getContext());
+                            builder.setRendererDisabled(C.TRACK_TYPE_VIDEO, true);
+
+                            DefaultTrackSelector.Parameters params = builder.build();
+                            trackSelector.setParameters(params);
+
+                            Toast.makeText(binding.getRoot().getContext(), "Subtitle off", Toast.LENGTH_SHORT).show();
+                            isSubtitle = false;
+                        }else{
+                            DefaultTrackSelector.ParametersBuilder builder =
+                                    new DefaultTrackSelector.ParametersBuilder(binding.getRoot().getContext());
+                            builder.setRendererDisabled(C.TRACK_TYPE_VIDEO, false);
+
+                            DefaultTrackSelector.Parameters params = builder.build();
+                            trackSelector.setParameters(params);
+
+                            Toast.makeText(binding.getRoot().getContext(), "Subtitle on", Toast.LENGTH_SHORT).show();
+                            isSubtitle = true;
+                        }
+
+                        alertDialog.dismiss();
+                        playVideo();
+                    }
+                });
             }
         });
     }
 
     private void createPlayer(){
         try{player.release();} catch(Exception e){}
-        player = new SimpleExoPlayer.Builder(this).build();
+//        trackSelector = new DefaultTrackSelector(binding.getRoot().getContext());
+        trackSelector = new DefaultTrackSelector(this);
+        player = new SimpleExoPlayer.Builder(this).setTrackSelector(trackSelector).build();
         binding.playerView.setPlayer(player);
         binding.videoTitle.setText(playerList.get(position).getTitle());
         binding.videoTitle.setSelected(true);
@@ -362,5 +402,22 @@ public class PlayerActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         player.release();
+    }
+    @Override
+    protected void onPause(){
+        super.onPause();
+        pauseVideo();
+//        if(player!=null){
+//            player.pause();
+//        }
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        playVideo();
+//        if(player != null) {
+//            player.play();
+//        }
     }
 }
