@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.WindowCompat;
 
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,9 +22,12 @@ import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.TracksInfo;
+import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -209,6 +213,50 @@ public class PlayerActivity extends AppCompatActivity {
                 AlertDialog alertDialog = builder.create();
                 alertDialog.show();
 
+//                mf_binding.audioTrackBtn.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        alertDialog.dismiss();
+//                        playVideo();
+//
+//                        ArrayList<String> audioTrack = new ArrayList<>();
+//                        for(int i = 0; i < player.getCurrentTrackGroups().length; i++ ){
+//                            if(player.getCurrentTrackGroups().get(i).getFormat(0).selectionFlags == C.SELECTION_FLAG_DEFAULT){
+//                                audioTrack.add(
+//                                        new Locale(
+//                                                player.getCurrentTrackGroups()
+//                                                        .get(i)
+//                                                        .getFormat(0)
+//                                                        .language
+//                                                        .toString()
+//                                        ).getDisplayLanguage()
+//                                );
+//                            }
+//                        }
+//
+//                        CharSequence[] tempTracks = audioTrack.toArray(new CharSequence[audioTrack.size()]);
+//                        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(binding.getRoot().getContext(), R.style.alertDialog)
+//                                .setTitle("Select an Audio Track")
+//                                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+//                                    @Override
+//                                    public void onCancel(DialogInterface dialog) {
+//                                        playVideo();
+//                                    }
+//                                })
+//                                .setItems(tempTracks, new DialogInterface.OnClickListener() {
+//                                    @Override
+//                                    public void onClick(DialogInterface dialog, int position) {
+//                                        Toast.makeText(binding.getRoot().getContext(), audioTrack.get(position) + " Selected", Toast.LENGTH_SHORT).show();
+//                                        trackSelector.setParameters(trackSelector.buildUponParameters().setPreferredAudioLanguage(audioTrack.get(position)));
+//                                    }
+//                                })
+//                                .setBackground(new ColorDrawable(0x803700b3));
+//
+//                        builder.create();
+//                        builder.show();
+//                    }
+//                });
+
                 mf_binding.audioTrackBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -216,40 +264,45 @@ public class PlayerActivity extends AppCompatActivity {
                         playVideo();
 
                         ArrayList<String> audioTrack = new ArrayList<>();
-                        for(int i = 0; i < player.getCurrentTrackGroups().length; i++ ){
-                            if(player.getCurrentTrackGroups().get(i).getFormat(0).selectionFlags == C.SELECTION_FLAG_DEFAULT){
-                                audioTrack.add(
-                                        new Locale(
-                                                player.getCurrentTrackGroups()
-                                                        .get(i)
-                                                        .getFormat(0)
-                                                        .language
-                                                        .toString()
-                                        ).getDisplayLanguage()
-                                );
+                        ArrayList<String> audioList = new ArrayList<>();
+                        for(TracksInfo.TrackGroupInfo group : player.getCurrentTracksInfo().getTrackGroupInfos())
+                        {
+                            if (group.getTrackType() == C.TRACK_TYPE_AUDIO) {
+                                TrackGroup groupInfo = group.getTrackGroup();
+                                for (int j = 0; j < groupInfo.length; j++) {
+                                    audioTrack.add(groupInfo.getFormat(j).language.toString());
+                                    audioList.add((audioList.size() + 1) + ". " + new Locale(groupInfo.getFormat(j).language.toString()).getDisplayLanguage()
+                                            + " (" + groupInfo.getFormat(j).label + ")");
+                                }
                             }
                         }
 
-                        CharSequence[] tempTracks = audioTrack.toArray(new CharSequence[audioTrack.size()]);
-                        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(binding.getRoot().getContext(), R.style.alertDialog)
-                                .setTitle("Select an Audio Track")
-                                .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                                    @Override
-                                    public void onCancel(DialogInterface dialog) {
-                                        playVideo();
-                                    }
-                                })
-                                .setItems(tempTracks, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int position) {
-                                        Toast.makeText(binding.getRoot().getContext(), audioTrack.get(position) + " Selected", Toast.LENGTH_SHORT).show();
-                                        trackSelector.setParameters(trackSelector.buildUponParameters().setPreferredAudioLanguage(audioTrack.get(position)));
-                                    }
-                                })
-                                .setBackground(new ColorDrawable(0x803700b3));
+                        if (audioList.get(0).contains("null")) {
+                            audioList.set(0, "1. Default Track");
+                        }
 
-                        builder.create();
-                        builder.show();
+                        CharSequence[] tempTracks = audioList.toArray(new CharSequence[audioList.size()]);
+                        AlertDialog audioDialog = new MaterialAlertDialogBuilder(binding.getRoot().getContext(), R.style.alertDialog)
+                                .setTitle("Select Language")
+                                .setOnCancelListener(dialog -> playVideo())
+                                .setPositiveButton("Off Audio", (dialog, which) -> {
+                                    trackSelector.setParameters(trackSelector.buildUponParameters().setRendererDisabled(
+                                            C.TRACK_TYPE_AUDIO, true
+                                    ));
+                                    dialog.dismiss();
+                                })
+                                .setItems(tempTracks, (dialog, position) -> {
+                                    Snackbar.make(binding.getRoot(), audioList.get(position) + " Selected", 3000).show();
+                                    trackSelector.setParameters(trackSelector.buildUponParameters()
+                                            .setRendererDisabled(C.TRACK_TYPE_AUDIO, false)
+                                            .setPreferredAudioLanguage(audioTrack.get(position)));
+                                })
+                                .create();
+                        audioDialog.show();
+                        audioDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.WHITE);
+                        if (audioDialog.getWindow() != null) {
+                            audioDialog.getWindow().setBackgroundDrawable(new ColorDrawable(0x99000000));
+                        }
                     }
                 });
 

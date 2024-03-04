@@ -11,7 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:controller_layout_id="@layout/custom_player_control_view"
-        android:keepScreenOn="true"/>
+        android:keepScreenOn="true"
+        android:background="@color/black"/>
 
     <LinearLayout
         android:id="@+id/topContorller"
