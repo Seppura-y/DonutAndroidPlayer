@@ -37,6 +37,8 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.view.Window;
 import android.widget.Toast;
@@ -63,6 +65,9 @@ public class PlayerActivity extends AppCompatActivity {
     private static ArrayList<VideoData> playerList;
 
     private float playbackSpeed = 1.0f;
+
+    private Timer timer = null;
+    private int sleepTime = 15;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -313,7 +318,7 @@ public class PlayerActivity extends AppCompatActivity {
                             audioDialog.getWindow().setBackgroundDrawable(new ColorDrawable(0x99000000));
                         }
                     }
-                });
+                }); //mf_binding.audioTrackBtn.setOnClickListener
 
 
                 mf_binding.subtitleBtn.setOnClickListener(new View.OnClickListener() {
@@ -344,7 +349,7 @@ public class PlayerActivity extends AppCompatActivity {
                         alertDialog.dismiss();
                         playVideo();
                     }
-                });
+                }); //mf_binding.subtitleBtn.setOnClickListener
 
                 mf_binding.audioBoosterBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -372,7 +377,7 @@ public class PlayerActivity extends AppCompatActivity {
                                     return null;
                         });
                     }
-                });
+                }); // mf_binding.audioBoosterBtn.setOnClickListener
 
 
                 mf_binding.speedBtn.setOnClickListener(new View.OnClickListener() {
@@ -406,9 +411,59 @@ public class PlayerActivity extends AppCompatActivity {
                             speedDialogBinding.speedText.setText(new DecimalFormat("#.##").format(playbackSpeed) + "X");
                         });
                     }
-                });
+                }); // mf_binding.speedBtn.setOnClickListener
+
+
+
+                mf_binding.sleepTimerBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        alertDialog.dismiss();
+                        if(timer != null) {
+                            Toast.makeText(binding.getRoot().getContext(),
+                                "Timer Alreadying Running\nClose App to Reset Timer.",
+                                Toast.LENGTH_SHORT).show();}
+                        else{
+                            View customDialogView = LayoutInflater.from(binding.getRoot().getContext()).inflate(R.layout.speed_dialog, binding.getRoot(), false);
+                            SpeedDialogBinding speedDialogBinding = SpeedDialogBinding.bind(customDialogView);
+                            MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(binding.getRoot().getContext())
+                                    .setView(customDialogView)
+                                    .setCancelable(false)
+                                    .setPositiveButton("OK",(dialogInterface, i) -> {
+                                        timer = new Timer();
+                                        TimerTask task = new TimerTask() {
+                                            @Override
+                                            public void run() {
+                                                moveTaskToBack(true);
+                                                System.exit(1);
+                                            }
+                                        };
+                                        timer.schedule(task, sleepTime * 1000L);
+                                        dialogInterface.dismiss();
+                                        playVideo();
+                                    })
+                                    .setBackground(new ColorDrawable(0x803700b3));
+
+                            AlertDialog boosterDialog = dialogBuilder.create();
+                            boosterDialog.show();
+
+                            speedDialogBinding.speedText.setText(sleepTime + " Min");
+                            speedDialogBinding.minusBtn.setOnClickListener(v1 -> {
+                                changeSleepTimer(false);
+                                speedDialogBinding.speedText.setText(sleepTime + " Min");
+                            });
+
+                            speedDialogBinding.plusBtn.setOnClickListener(v1 -> {
+                                changeSleepTimer(true);
+                                speedDialogBinding.speedText.setText(sleepTime + " Min");
+                            });
+                        }
+                    }
+                }); // mf_binding.sleepTimerBtn.setOnClickListener
+
+
             }
-        });
+        });//binding.moreFeaturesBtn.setOnClickListener
     }
 
     private void createPlayer(){
@@ -538,6 +593,18 @@ public class PlayerActivity extends AppCompatActivity {
         }
 
         player.setPlaybackSpeed(playbackSpeed);
+    }
+
+    private void changeSleepTimer(Boolean isIncrement){
+        if(isIncrement){
+            if(sleepTime <= 120){
+                sleepTime += 5;
+            }
+        }else{
+            if(sleepTime >= 5){
+                sleepTime -= 5;
+            }
+        }
     }
 
 
