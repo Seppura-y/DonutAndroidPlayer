@@ -7,6 +7,7 @@ import androidx.core.view.WindowCompat;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.media.audiofx.LoudnessEnhancer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
@@ -17,6 +18,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.example.donutplayer.databinding.ActivityPlayerBinding;
+import com.example.donutplayer.databinding.BoosterBinding;
 import com.example.donutplayer.databinding.MoreFeaturesBinding;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.MediaItem;
@@ -28,6 +30,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
+import com.lukelorusso.verticalseekbar.VerticalSeekBar;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -53,6 +56,8 @@ public class PlayerActivity extends AppCompatActivity {
     private static SimpleExoPlayer player = null;
 
     private static DefaultTrackSelector trackSelector = null;
+
+    private static LoudnessEnhancer loudnessEnhancer = null;
     private static ArrayList<VideoData> playerList;
 
     @Override
@@ -336,6 +341,34 @@ public class PlayerActivity extends AppCompatActivity {
                         playVideo();
                     }
                 });
+
+                mf_binding.audioBoosterBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        alertDialog.dismiss();
+                        View customDialogView = LayoutInflater.from(binding.getRoot().getContext()).inflate(R.layout.booster, binding.getRoot(), false);
+                        BoosterBinding boosterBinding = BoosterBinding.bind(customDialogView);
+                        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(binding.getRoot().getContext())
+                                .setView(customDialogView)
+                                .setOnCancelListener(dialogInterface->playVideo())
+                                .setPositiveButton("OK",(dialogInterface, i) -> {
+                                    loudnessEnhancer.setTargetGain(boosterBinding.verticalBar.getProgress() * 100);
+                                    playVideo();
+                                    dialogInterface.dismiss();
+                                })
+                                .setBackground(new ColorDrawable(0x803700b3));
+
+                        AlertDialog boosterDialog = dialogBuilder.create();
+                        boosterDialog.show();
+
+                        boosterBinding.verticalBar.setProgress((int)loudnessEnhancer.getTargetGain() / 100);
+                        boosterBinding.progressText.setText("Audio Boost\n\n" + (loudnessEnhancer.getTargetGain() / 10) + "%");
+                        boosterBinding.verticalBar.setOnProgressChangeListener(progress -> {
+                            boosterBinding.progressText.setText("Audio Boost\n\n" + (progress * 10) + "%");
+                                    return null;
+                        });
+                    }
+                });
             }
         });
     }
@@ -367,6 +400,8 @@ public class PlayerActivity extends AppCompatActivity {
         playVideo();
         playInFullscreen(isFullscreen);
         setVisibility();
+        loudnessEnhancer = new LoudnessEnhancer(player.getAudioSessionId());
+        loudnessEnhancer.setEnabled(true);
     }
 
     private void playVideo(){
