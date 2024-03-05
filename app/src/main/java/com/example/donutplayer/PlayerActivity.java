@@ -20,6 +20,7 @@ import android.view.WindowManager;
 import com.example.donutplayer.databinding.ActivityPlayerBinding;
 import com.example.donutplayer.databinding.BoosterBinding;
 import com.example.donutplayer.databinding.MoreFeaturesBinding;
+import com.example.donutplayer.databinding.SpeedDialogBinding;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
@@ -32,6 +33,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.lukelorusso.verticalseekbar.VerticalSeekBar;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
@@ -59,6 +61,8 @@ public class PlayerActivity extends AppCompatActivity {
 
     private static LoudnessEnhancer loudnessEnhancer = null;
     private static ArrayList<VideoData> playerList;
+
+    private float playbackSpeed = 1.0f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -369,12 +373,49 @@ public class PlayerActivity extends AppCompatActivity {
                         });
                     }
                 });
+
+
+                mf_binding.speedBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        alertDialog.dismiss();
+                        playVideo();
+
+                        View customDialogView = LayoutInflater.from(binding.getRoot().getContext()).inflate(R.layout.speed_dialog, binding.getRoot(), false);
+                        SpeedDialogBinding speedDialogBinding = SpeedDialogBinding.bind(customDialogView);
+                        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(binding.getRoot().getContext())
+                                .setView(customDialogView)
+                                .setCancelable(false)
+                                .setPositiveButton("OK",(dialogInterface, i) -> {
+                                    dialogInterface.dismiss();
+                                })
+                                .setBackground(new ColorDrawable(0x803700b3));
+
+                        AlertDialog boosterDialog = dialogBuilder.create();
+                        boosterDialog.show();
+
+                        speedDialogBinding.speedText.setText(new DecimalFormat("#.##").format(playbackSpeed) + "X");
+
+                        speedDialogBinding.minusBtn.setOnClickListener(v1 -> {
+                            changeSpeed(false);
+                            speedDialogBinding.speedText.setText(new DecimalFormat("#.##").format(playbackSpeed) + "X");
+                        });
+
+                        speedDialogBinding.plusBtn.setOnClickListener(v1 -> {
+                            changeSpeed(true);
+                            speedDialogBinding.speedText.setText(new DecimalFormat("#.##").format(playbackSpeed) + "X");
+                        });
+                    }
+                });
             }
         });
     }
 
     private void createPlayer(){
         try{player.release();} catch(Exception e){}
+
+        playbackSpeed = 1.0f;
+
 //        trackSelector = new DefaultTrackSelector(binding.getRoot().getContext());
         trackSelector = new DefaultTrackSelector(this);
         player = new SimpleExoPlayer.Builder(this).setTrackSelector(trackSelector).build();
@@ -483,6 +524,20 @@ public class PlayerActivity extends AppCompatActivity {
         binding.playPauseBtn.setVisibility(visibility);
         if(isLocked) binding.lockBtn.setVisibility(View.VISIBLE);
         else binding.lockBtn.setVisibility(visibility);
+    }
+
+    private void changeSpeed(Boolean isIncrement){
+        if(isIncrement){
+            if(playbackSpeed <= 2.9f){
+                playbackSpeed += 0.1f;
+            }
+        }else{
+            if(playbackSpeed >= 0.2f){
+                playbackSpeed -= 0.1f;
+            }
+        }
+
+        player.setPlaybackSpeed(playbackSpeed);
     }
 
 
