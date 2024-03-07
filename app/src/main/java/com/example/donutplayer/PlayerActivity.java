@@ -30,6 +30,7 @@ import com.example.donutplayer.databinding.BoosterBinding;
 import com.example.donutplayer.databinding.MoreFeaturesBinding;
 import com.example.donutplayer.databinding.SpeedDialogBinding;
 import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -66,7 +67,7 @@ public class PlayerActivity extends AppCompatActivity {
     private boolean isSubtitle = true;
     private static ActivityPlayerBinding binding = null;
     private static Runnable runnable;
-    private static SimpleExoPlayer player = null;
+    private static ExoPlayer player = null;
 
     private static DefaultTrackSelector trackSelector = null;
 
@@ -79,6 +80,8 @@ public class PlayerActivity extends AppCompatActivity {
     private int sleepTime = 15;
 
     private boolean isPipMode = false;
+
+    private int moreTime = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -512,6 +515,32 @@ public class PlayerActivity extends AppCompatActivity {
 
             }
         });//binding.moreFeaturesBtn.setOnClickListener
+
+
+
+
+        DoubleClickListener.Callback callback = new DoubleClickListener.Callback() {
+            @Override
+            public void doubleClicked() {
+                // 双击事件的处理逻辑
+                binding.forwardBtn.setVisibility(View.VISIBLE);
+                player.seekTo(player.getCurrentPosition() + 10000);
+                moreTime = 0;
+            }
+        };
+        binding.forwardFrameLayout.setOnClickListener(new DoubleClickListener(callback));
+
+        callback = new DoubleClickListener.Callback() {
+            @Override
+            public void doubleClicked() {
+                // 双击事件的处理逻辑
+                binding.rewindBtn.setVisibility(View.VISIBLE);
+                player.seekTo(player.getCurrentPosition() + 10000);
+                moreTime = 0;
+            }
+        };
+        binding.rewindFrameLayout.setOnClickListener(new DoubleClickListener(callback));
+
     }
 
     private void createPlayer(){
@@ -521,7 +550,7 @@ public class PlayerActivity extends AppCompatActivity {
 
 //        trackSelector = new DefaultTrackSelector(binding.getRoot().getContext());
         trackSelector = new DefaultTrackSelector(this);
-        player = new SimpleExoPlayer.Builder(this).setTrackSelector(trackSelector).build();
+        player = new ExoPlayer.Builder(this).setTrackSelector(trackSelector).build();
         binding.playerView.setPlayer(player);
         binding.videoTitle.setText(playerList.get(position).getTitle());
         binding.videoTitle.setSelected(true);
@@ -627,6 +656,14 @@ public class PlayerActivity extends AppCompatActivity {
         binding.playPauseBtn.setVisibility(visibility);
         if(isLocked) binding.lockBtn.setVisibility(View.VISIBLE);
         else binding.lockBtn.setVisibility(visibility);
+
+        if(moreTime == 2){
+            binding.rewindBtn.setVisibility(View.GONE);
+            binding.forwardBtn.setVisibility(View.GONE);
+        }
+        else{
+            moreTime++;
+        }
     }
 
     private void changeSpeed(boolean isIncrement){
