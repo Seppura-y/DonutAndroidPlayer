@@ -9,7 +9,9 @@ import android.app.PictureInPictureParams;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.media.audiofx.LoudnessEnhancer;
 import android.net.Uri;
@@ -17,6 +19,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.Handler;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -56,10 +59,11 @@ import androidx.core.view.WindowInsetsControllerCompat;
 public class PlayerActivity extends AppCompatActivity {
 
     public static int position = -1;
-    private Boolean repeat = false;
-    private Boolean isFullscreen = false;
-    private Boolean isLocked = false;
-    private Boolean isSubtitle = true;
+    public static int pipStatus = 0;
+    private boolean repeat = false;
+    private boolean isFullscreen = false;
+    private boolean isLocked = false;
+    private boolean isSubtitle = true;
     private static ActivityPlayerBinding binding = null;
     private static Runnable runnable;
     private static SimpleExoPlayer player = null;
@@ -74,12 +78,11 @@ public class PlayerActivity extends AppCompatActivity {
     private Timer timer = null;
     private int sleepTime = 15;
 
-    private Boolean isPipMode = false;
+    private boolean isPipMode = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
         // 应用自定义主题
         // 需要在setContentView前调用
         setTheme(R.style.playerActivityTheme);
@@ -470,7 +473,8 @@ public class PlayerActivity extends AppCompatActivity {
 
                 mf_binding.pipModeBtn.setOnClickListener(new View.OnClickListener(){
                     @Override
-                    public void onClick(View v) {
+                    public void onClick(View view) {
+
                         AppOpsManager appOpsManager = (AppOpsManager) getSystemService(Context.APP_OPS_SERVICE);
                         boolean status = false;
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -487,16 +491,17 @@ public class PlayerActivity extends AppCompatActivity {
                                 alertDialog.dismiss();
                                 binding.playerView.hideController();
                                 playVideo();
-                                isPipMode = true;
+//                                isPipMode = true;
+                                pipStatus = 0;
                             } else {
-                                isPipMode = false;
+//                                isPipMode = false;
                                 Intent intent = new Intent("android.settings.PICTURE_IN_PICTURE_SETTINGS",
                                         Uri.parse("package:" + getPackageName()));
                                 startActivity(intent);
                             }
 
                         } else {
-                            isPipMode = false;
+//                            isPipMode = false;
                             Toast.makeText(getApplicationContext(), "Feature Not Supported", Toast.LENGTH_SHORT).show();
                             alertDialog.dismiss();
                             playVideo();
@@ -553,7 +558,7 @@ public class PlayerActivity extends AppCompatActivity {
         player.pause();
     }
 
-    private void nextPreviousVideo(Boolean isNext)
+    private void nextPreviousVideo(boolean isNext)
     {
         if(isNext){
             setPosition(true);
@@ -565,7 +570,7 @@ public class PlayerActivity extends AppCompatActivity {
         createPlayer();
     }
 
-    private void setPosition(Boolean isIncrement){
+    private void setPosition(boolean isIncrement){
         if(isIncrement){
             if(playerList.size() - 1 == position){
                 position = 0;
@@ -584,7 +589,7 @@ public class PlayerActivity extends AppCompatActivity {
         }
     }
 
-    private void playInFullscreen(Boolean enable){
+    private void playInFullscreen(boolean enable){
         if(enable){
             binding.playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FILL);
             player.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
@@ -624,7 +629,7 @@ public class PlayerActivity extends AppCompatActivity {
         else binding.lockBtn.setVisibility(visibility);
     }
 
-    private void changeSpeed(Boolean isIncrement){
+    private void changeSpeed(boolean isIncrement){
         if(isIncrement){
             if(playbackSpeed <= 2.9f){
                 playbackSpeed += 0.1f;
@@ -638,7 +643,7 @@ public class PlayerActivity extends AppCompatActivity {
         player.setPlaybackSpeed(playbackSpeed);
     }
 
-    private void changeSleepTimer(Boolean isIncrement){
+    private void changeSleepTimer(boolean isIncrement){
         if(isIncrement){
             if(sleepTime <= 120){
                 sleepTime += 5;
@@ -650,6 +655,25 @@ public class PlayerActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onPictureInPictureModeChanged (boolean isInPictureInPictureMode, Configuration newConfig) {
+        if (pipStatus != 0) {
+            finish();
+//            player.pause();
+            Intent intent = new Intent(getApplicationContext(), PlayerActivity.class);
+            switch (pipStatus){
+                case 1:
+                    intent.putExtra("class", "FolderActivity");
+                    break;
+                case 2:
+                    intent.putExtra("class","AllVideos");
+                    break;
+            }
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getApplicationContext().startActivity(intent);
+        }
+//        if(!isInPictureInPictureMode) pauseVideo();
+    }
 
     @Override
     protected void onDestroy() {
@@ -659,8 +683,8 @@ public class PlayerActivity extends AppCompatActivity {
     @Override
     protected void onPause(){
         super.onPause();
-        if(!isPipMode)
-        pauseVideo();
+//        if(!isPipMode)
+//        pauseVideo();
 //        if(player!=null){
 //            player.pause();
 //        }
@@ -669,7 +693,8 @@ public class PlayerActivity extends AppCompatActivity {
     @Override
     protected void onResume(){
         super.onResume();
-        playVideo();
+
+//        playVideo();
 //        if(player != null) {
 //            player.play();
 //        }

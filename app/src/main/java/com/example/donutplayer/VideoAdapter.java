@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.donutplayer.databinding.VideoViewBinding;
+import com.google.android.exoplayer2.Player;
 import com.google.android.material.imageview.ShapeableImageView;
 
 import java.util.ArrayList;
@@ -79,9 +80,11 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoHolder>
             @Override
             public void onClick(View v) {
                 if(isFolder){
+                    PlayerActivity.pipStatus = 1;
                     sendIntent(position, "FolderActivity");
                 }
                 else{
+                    PlayerActivity.pipStatus = 2;
                     sendIntent(position, "AllVideos");
                 }
 
