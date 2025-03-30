@@ -23,3 +23,6 @@
 
 - 音轨选择
 ![Image](https://github.com/user-attachments/assets/dacdc60a-733b-499f-9518-67c26ce8ced6)
+
+- 画中画播放
+![Image](https://github.com/user-attachments/assets/69f3182b-0036-4d81-b69e-3eaf7b5eaabf)
