@@ -25,4 +25,4 @@
 ![Image](https://github.com/user-attachments/assets/dacdc60a-733b-499f-9518-67c26ce8ced6)
 
 - 画中画播放
-![Image](https://github.com/user-attachments/assets/69f3182b-0036-4d81-b69e-3eaf7b5eaabf)
+- <img src="https://github.com/user-attachments/assets/69f3182b-0036-4d81-b69e-3eaf7b5eaabf" width="400" alt="读取本地文件夹截图2">
