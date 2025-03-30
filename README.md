@@ -1,5 +1,5 @@
 # DonutAndroidPlayer
-
+  采用 Google 的 ExoPlayer 作为核心播放引擎，支持音轨选择，播放速度控制，音量控制，画中画等常用功能
 # 运行示例
 - 主页
 <img src="https://github.com/user-attachments/assets/f6bc68ff-4576-474f-bd6b-e1c70c99602c" width="400" alt="主页截图">
